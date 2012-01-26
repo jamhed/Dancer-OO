@@ -5,9 +5,7 @@ use Dancer::OO::Dancer;
 
 get '' => wrap {
 	my ($self, $context, $params) = @_;
-	return <<HTML;
-<html><body>Holla</body></html>
-HTML
+	template $self, 'index', { p => $params };
 };
 
 1;
