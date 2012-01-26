@@ -1,1 +1,19 @@
 Simple Dancer OO approach.
+
+The idea is simple -- we need to defer route handler declaration. It could be
+done with re-definition Dancer DSL words like get, post, any, etc. It's done
+in Dancer::OO::Dancer module.
+
+Deferred declarations are stored in package _handler array variable.
+
+This approach allows to define and use common handlers and to write extendable modules
+that could be mounted to later declared uris.
+
+To use this deferred technique package must be inherited from Dancer::OO::Object package,
+which sole purpose is to install deffered handlers. It does so by building inheritnance
+tree and calling Dancer::* methods with obvious alterations.
+
+Handlers are installed to prefixed routes, thus limiting route syntax to simple strings.
+
+I've included a sample Sample application, which has common Sample::Base for Sample::Root
+and Sample::Demo packages.
