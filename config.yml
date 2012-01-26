@@ -8,7 +8,7 @@ appdir: './'
 session: "YAML"
 session_dir: "sessions"
 session_expires: 2592000
-charset: 'utf-8'
+charset: 'utf8'
 
 template: "template_toolkit"
 engines:
