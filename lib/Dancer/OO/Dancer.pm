@@ -1,7 +1,9 @@
 package Dancer::OO::Dancer;
 use strict;
 use Dancer ();
-use JSON;
+use YAML;
+
+our @route_handler = qw( get post any patch del options put );
 
 sub debug {
 	Dancer::debug( join( ' ', map { ref $_ ? Dump($_) : $_ } map { $_ ? $_ : '_' } @_ ) );
@@ -11,15 +13,15 @@ sub import {
 	my ($self) = @_;
 	my $class = caller;
 	no strict 'refs';
-	*{"$class\::get"} = sub {
-		push @{ ${"$class\::_handler"} }, [ 'get', @_ ];
-	};
-	*{"$class\::post"} = sub {
-		push @{ ${"$class\::_handler"} }, [ 'post', @_ ];
-	};
-	*{"$class\::any"} = sub {
-		push @{ ${"$class\::_handler"} }, [ 'any', @_ ];
-	};
+
+	# redefine router handlers
+	foreach my $handler (@route_handler) {
+		*{"$class\::$handler"} = sub {
+			push @{ ${"$class\::_handler"} }, [ $handler, @_ ];
+		};
+	}
+
+	# dancer improvements
 	*{"$class\::template"} = sub {
 		my ( $self, $template, $args ) = @_;
 		$args = {} unless $args;
@@ -28,10 +30,7 @@ sub import {
 		$args->{c} ||= Dancer::session($k) || {};
 		return Dancer::template( join( '/', ${"$self\::_prefix"}, $template ), $args );
 	};
-	*{"$class\::upload"}       = \&Dancer::upload;
-	*{"$class\::content_type"} = \&Dancer::content_type;
-	*{"$class\::header"}       = \&Dancer::header;
-	*{"$class\::redirect"}     = \&Dancer::redirect;
+
 	*{"$class\::wrap"}         = sub (&) {
 		my ($handler) = @_;
 		return sub {
@@ -46,11 +45,12 @@ sub import {
 		  }
 	};
 
-	*{"$class\::json"} = sub { JSON->new->utf8(0)->pretty(1)->encode(shift) };
 	*{"$class\::debug"} = \&debug;
 
-	*{"$class\::params"} = \&Dancer::params;
-	*{"$class\::session"} = \&Dancer::session;
+	# suck in all Dancer methods
+	for my $method (@Dancer::EXPORT) {
+		*{"$class\::$method"} = *{"Dancer\::$method"} if not defined &{"$class\::$method"};
+	}
 }
 
 1;

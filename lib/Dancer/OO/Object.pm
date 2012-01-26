@@ -24,9 +24,9 @@ sub import {
 			next if $seen{$path};
 			debug( 'for', $self, $_->[0], $prefix . $_->[1], 'in', $isa);
 			$seen{$path} = 1;
-			Dancer::get $prefix . $_->[1]  => $_->[2]->($self) if $_->[0] eq 'get';
-			Dancer::post $prefix . $_->[1] => $_->[2]->($self) if $_->[0] eq 'post';
-			Dancer::any $prefix . $_->[1]  => $_->[2]->($self) if $_->[0] eq 'any';
+			foreach my $handler (@Dancer::OO::Dancer::route_handler) {
+				&{"Dancer\::$handler"}( $prefix . $_->[1], $_->[2]->($self) );
+			}
 		}
 	}
 }
