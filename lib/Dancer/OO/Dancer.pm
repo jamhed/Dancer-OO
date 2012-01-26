@@ -37,15 +37,10 @@ sub import {
 		return sub {
 			my ($self) = @_;
 			return sub {
-				my $k       = join( '/', ${"$self\::_prefix"}, 'pager' );
-				my $p       = Dancer::params;
-				my $context = Dancer::session($k) || {};
-				my $pp;
-				foreach my $k ( keys %$p ) {
-					$pp->{ decode( 'utf8', $k ) } = $p->{$k};    # fucking dancer utf8 bug again?
-				}
-				my $ret     = $handler->( $self, $context, $pp );
-				Dancer::session( $k, $context );
+				my $params	= Dancer::params;
+				my $context	= Dancer::session;
+				my $ret     = $handler->( $self, $context, $params );
+				Dancer::session( $context );
 				return $ret;
 			  }
 		  }
